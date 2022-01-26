@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3'
 
 networks:
   monitoring:
@@ -11,7 +11,6 @@ volumes:
 services:
   node-exporter:
     image: prom/node-exporter:v1.3.1
-    container_name: node-exporter
     restart: unless-stopped
     volumes:
       - /proc:/host/proc:ro
@@ -29,7 +28,6 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.32.1
-    container_name: prometheus
     restart: unless-stopped
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
