@@ -26,15 +26,16 @@ services:
     networks:
       - monitoring
 
-  postgres-exporter:
-    image: bitnami/postgres-exporter:0.10.1
+  docker-exporter:
+    image: docker-exporter
     restart: unless-stopped
-    expose:
-      - 9187
-    ports:
-      - 9187:9187
-    env_file:
-      - .env
+    build: 
+      context: ./docker-exporter
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose: 
+      - 9100
     networks:
       - monitoring
 

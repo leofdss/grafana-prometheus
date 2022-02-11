@@ -11,6 +11,7 @@ scrape_configs:
     static_configs:
     - targets: ["node-exporter:9100"]
 
-  - job_name: "postgres"
+  - job_name: "docker"
     static_configs:
-    - targets: ["postgres-exporter:9187"]
+    - targets: ["docker-exporter:9100"]
+
