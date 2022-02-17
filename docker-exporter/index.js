@@ -6,7 +6,17 @@ const app = express()
 const Prometheus = require('prom-client')
 Prometheus.register.clear()
 
-const gaugeMap = new Map()
+const cpuGauge = new Prometheus.Gauge({
+  name: 'docker_cpu',
+  help: 'docker_cpu_help',
+  labelNames: ['name']
+})
+
+const memoryGauge = new Prometheus.Gauge({
+  name: 'docker_memory',
+  help: 'docker_memory_help',
+  labelNames: ['name']
+})
 
 /**
  * 
@@ -24,7 +34,7 @@ function dockerStats() {
 
         const data = [];
         for (const line of lines) {
-          if(line) {
+          if (line) {
             const split = line.split('\t')
             data.push({
               name: String(split[0]),
@@ -44,37 +54,8 @@ async function metrics() {
   const data = await dockerStats();
 
   for (const item of data) {
-
-    // cpu
-    const cpuGaugeMapName = 'docker_cpu_' + item.name.split('-').join('_')
-    const cpuGaugeMap = gaugeMap.get(cpuGaugeMapName)
-    
-    if (cpuGaugeMap) {
-      cpuGaugeMap.set(item.cpu)
-    } else {
-      const cpuGauge = new Prometheus.Gauge({
-        name: cpuGaugeMapName,
-        help: cpuGaugeMapName + '_help',
-      })
-      cpuGauge.set(item.cpu)
-      gaugeMap.set(cpuGaugeMapName, cpuGauge)
-    }
-
-
-    // memory
-    const memoryGaugeMapName = 'docker_memory_' + item.name.split('-').join('_')
-    const memoryGaugeMap = gaugeMap.get(memoryGaugeMapName)
-
-    if(memoryGaugeMap) {
-      memoryGaugeMap.set(item.memory)
-    } else {
-      const memoryGauge = new Prometheus.Gauge({
-        name: memoryGaugeMapName,
-        help: memoryGaugeMapName + '_help',
-      })
-      memoryGauge.set(item.memory)
-      gaugeMap.set(memoryGaugeMapName, memoryGauge)
-    }
+    cpuGauge.labels(item.name).set(item.cpu);
+    memoryGauge.labels(item.name).set(item.memory);
   }
 
   return await Prometheus.register.metrics()
